@@ -1,1 +1,77 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maritiem Museum – Digitale Museumassistent</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
+  <div class="app">
+
+    <!-- ================= HEADER ================= -->
+    <header class="app-header">
+      <div class="header-text">
+        <h1>Maritiem Museum</h1>
+        <p class="subtitle">Jouw digitale museumassistent</p>
+      </div>
+      <button id="newChatBtn" class="new-chat-btn" type="button">
+        <span aria-hidden="true">↻</span> Nieuw gesprek
+      </button>
+    </header>
+
+    <!-- ================= CHATVENSTER ================= -->
+    <main class="chat-container">
+
+      <!-- role="log" + aria-live zorgen dat schermlezers nieuwe berichten voorlezen -->
+      <div
+        id="chatWindow"
+        class="chat-window"
+        role="log"
+        aria-live="polite"
+        aria-label="Gesprek met de museumassistent"
+      >
+        <!-- Berichten worden hier automatisch door script.js toegevoegd -->
+      </div>
+
+      <!-- Suggestieknoppen: verdwijnen na de eerste vraag, komen terug bij "Nieuw gesprek" -->
+      <div id="suggestions" class="suggestions" aria-label="Voorbeeldvragen">
+        <button class="suggestion-btn" type="button" data-question="Ontdek het museum">
+          Ontdek het museum
+        </button>
+        <button class="suggestion-btn" type="button" data-question="Schepen en scheepvaart">
+          Schepen en scheepvaart
+        </button>
+        <button class="suggestion-btn" type="button" data-question="De haven van Rotterdam">
+          De haven van Rotterdam
+        </button>
+        <button class="suggestion-btn" type="button" data-question="Tentoonstellingen">
+          Tentoonstellingen
+        </button>
+      </div>
+    </main>
+
+    <!-- ================= INVOERVELD ================= -->
+    <form id="chatForm" class="chat-form" autocomplete="off">
+      <label for="userInput" class="sr-only">Typ je vraag aan de museumassistent</label>
+      <input
+        type="text"
+        id="userInput"
+        name="userInput"
+        placeholder="Typ hier je vraag..."
+        aria-describedby="inputHint"
+      >
+      <span id="inputHint" class="sr-only">
+        Druk op Enter of klik op Verstuur om je vraag te versturen
+      </span>
+      <button type="submit" id="sendBtn" class="send-btn">
+        Verstuur
+      </button>
+    </form>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
