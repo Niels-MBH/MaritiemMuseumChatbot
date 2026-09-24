@@ -1,1 +1,358 @@
+/* ==========================================================================
+   MARITIEM MUSEUM CHATBOT — SCRIPT.JS
+   Dit is een DEMOVERSIE zonder echte AI. Antwoorden komen uit de lijst
+   DEMO_ANTWOORDEN hieronder. Wil je later een nieuwe vraag/antwoord
+   toevoegen? Zoek naar "NIEUWE VRAGEN TOEVOEGEN" verderop in dit bestand.
+   ========================================================================== */
 
+(function () {
+  "use strict";
+
+  /* ------------------------------------------------------------------------
+     1. DOM-ELEMENTEN OPHALEN
+     ------------------------------------------------------------------------ */
+  const chatWindow = document.getElementById("chatWindow");
+  const chatForm = document.getElementById("chatForm");
+  const userInput = document.getElementById("userInput");
+  const sendBtn = document.getElementById("sendBtn");
+  const newChatBtn = document.getElementById("newChatBtn");
+  const suggestionsBox = document.getElementById("suggestions");
+  const suggestionButtons = document.querySelectorAll(".suggestion-btn");
+
+  const WELCOME_MESSAGE =
+    "Ahoy! Welkom bij het Maritiem Museum Rotterdam. Ik ben jouw digitale " +
+    "museumassistent. Wil je meer weten over schepen, de Rotterdamse haven, " +
+    "onze tentoonstellingen of maritieme geschiedenis? Stel gerust je vraag!";
+
+  const DEMO_MELDING =
+    "Dit is nog een demoversie van de chatbot, dus ik ken deze specifieke " +
+    "vraag nog niet. Probeer gerust een van de voorbeeldvragen hierboven, " +
+    "of stel een vraag over schepen, de haven van Rotterdam of maritieme " +
+    "geschiedenis. Binnenkort kan ik dankzij een uitgebreidere kennisbank " +
+    "veel meer vragen beantwoorden!";
+
+  /* ------------------------------------------------------------------------
+     2. NIEUWE VRAGEN TOEVOEGEN
+     ------------------------------------------------------------------------
+     Elk item hieronder heeft:
+       - keywords: een lijst met woorden/zinnen. Als de vraag van de
+         bezoeker één van deze bevat, wordt dit antwoord gebruikt. Voeg
+         gerust meerdere variaties toe (bijv. "kapitein" en "wat doet een
+         kapitein" en "taak kapitein").
+       - answer: het antwoord dat de chatbot dan geeft.
+
+     Belangrijk (zie opdracht): gebruik alleen betrouwbare, algemene
+     informatie. Verzin geen specifieke museumobjecten, actuele
+     tentoonstellingen, ticketprijzen of openingstijden.
+     ------------------------------------------------------------------------ */
+  const DEMO_ANTWOORDEN = [
+    {
+      id: "over-museum",
+      keywords: [
+        "wat is het maritiem museum",
+        "wat is dit museum",
+        "over het museum",
+        "ontdek het museum",
+        "wat is het museum",
+        "vertel over het museum",
+      ],
+      answer:
+        "Het Maritiem Museum Rotterdam is een museum dat zich richt op de " +
+        "maritieme geschiedenis: scheepvaart, havens en de relatie tussen " +
+        "mensen en het water. Je kunt er meer leren over schepen, techniek " +
+        "en het leven op en rond zee. Voor de actuele openingstijden en " +
+        "tentoonstellingen raad ik je aan de officiële website van het " +
+        "museum te raadplegen.",
+    },
+    {
+      id: "wat-bekijken",
+      keywords: [
+        "wat kan ik bekijken",
+        "wat kan ik zien",
+        "wat is er te zien",
+        "wat valt er te bekijken",
+        "collectie",
+      ],
+      answer:
+        "In het museum kun je uiteenlopende maritieme objecten bekijken, " +
+        "zoals scheepsmodellen, historische kaarten, schilderijen en " +
+        "navigatie-instrumenten. Ook zijn er regelmatig wisselende " +
+        "tentoonstellingen over specifieke thema's binnen de maritieme " +
+        "wereld. Voor de actuele tentoonstellingen kun je het beste de " +
+        "officiële website van het museum checken.",
+    },
+    {
+      id: "schepen-scheepvaart",
+      keywords: [
+        "schepen en scheepvaart",
+        "welke soorten schepen",
+        "soorten schepen",
+        "wat voor schepen",
+        "scheepvaart",
+      ],
+      answer:
+        "Er bestaan veel soorten schepen, zoals vrachtschepen, " +
+        "containerschepen, tankers, vissersschepen, zeilschepen en " +
+        "marineschepen. Elk type schip is ontworpen voor een specifiek " +
+        "doel, zoals goederenvervoer, visserij of defensie. Scheepvaart is " +
+        "al eeuwenlang belangrijk voor handel en verbinding tussen landen.",
+    },
+    {
+      id: "vrachtschip",
+      keywords: ["vrachtschip", "wat is een vrachtschip"],
+      answer:
+        "Een vrachtschip is een schip dat speciaal is gebouwd om grote " +
+        "hoeveelheden goederen te vervoeren, zoals containers, " +
+        "grondstoffen of voertuigen. Vrachtschepen zijn een essentieel " +
+        "onderdeel van de wereldwijde handel.",
+    },
+    {
+      id: "haven-rotterdam",
+      keywords: [
+        "haven van rotterdam",
+        "waarom is rotterdam",
+        "rotterdamse haven",
+        "belangrijke havenstad",
+      ],
+      answer:
+        "Rotterdam ligt aan de Nieuwe Maas, met een directe verbinding naar " +
+        "de Noordzee. Die ligging maakte de stad al eeuwenlang een " +
+        "belangrijke schakel in de handel en scheepvaart tussen Nederland " +
+        "en de rest van de wereld, en dat is nog steeds zo.",
+    },
+    {
+      id: "maritieme-geschiedenis",
+      keywords: ["maritieme geschiedenis", "wat is maritieme geschiedenis"],
+      answer:
+        "Maritieme geschiedenis gaat over de geschiedenis van scheepvaart, " +
+        "havens, zeevaart en de manier waarop mensen door de eeuwen heen " +
+        "met de zee en het water hebben geleefd en gewerkt.",
+    },
+    {
+      id: "kapitein",
+      keywords: ["kapitein", "wat doet een kapitein", "taak van een kapitein"],
+      answer:
+        "Een kapitein is eindverantwoordelijk voor een schip en de " +
+        "bemanning. Hij of zij zorgt voor de navigatie, de veiligheid aan " +
+        "boord en de algehele leiding tijdens de reis.",
+    },
+    {
+      id: "scheepsmodel",
+      keywords: ["scheepsmodel", "wat is een scheepsmodel"],
+      answer:
+        "Een scheepsmodel is een verkleinde, gedetailleerde nabootsing van " +
+        "een echt schip. Scheepsmodellen worden vaak gebruikt om schepen " +
+        "te ontwerpen, te bestuderen of tentoon te stellen in musea.",
+    },
+    {
+      id: "tentoonstellingen",
+      keywords: [
+        "tentoonstellingen",
+        "welke tentoonstelling",
+        "expositie",
+        "wat is er nu te zien",
+      ],
+      answer:
+        "Het museum organiseert regelmatig wisselende tentoonstellingen " +
+        "over verschillende maritieme thema's. Omdat dit een demoversie " +
+        "is, heb ik nog geen actuele informatie over welke tentoonstelling " +
+        "er precies nu te zien is — kijk daarvoor op de officiële website " +
+        "van het museum.",
+    },
+  ];
+
+  /* ------------------------------------------------------------------------
+     3. TEKST NORMALISEREN EN ANTWOORD ZOEKEN
+     ------------------------------------------------------------------------ */
+
+  // Maakt tekst "plat": kleine letters, geen leestekens, geen dubbele spaties.
+  // Zo herkent de chatbot ook eenvoudige variaties op dezelfde vraag.
+  function normaliseer(tekst) {
+    return tekst
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "") // accenten weghalen (é -> e)
+      .replace(/[^\w\s]/g, " ") // leestekens vervangen door spatie
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  // Deze functie is bewust apart gezet: dit is de plek waar later de
+  // echte AI-koppeling komt. Voor nu geeft hij een demo-antwoord terug,
+  // met een kleine kunstmatige vertraging zodat het "denken" voelt.
+  //
+  // LATER VERVANGEN DOOR ECHTE AI:
+  // Vervang de inhoud van deze functie door bijvoorbeeld een fetch()-
+  // aanroep naar je eigen backend, die op zijn beurt veilig met een
+  // AI-model praat. Plaats nooit een geheime API-sleutel hier in de
+  // front-end code.
+  function haalChatbotAntwoordOp(vraag) {
+    return new Promise((resolve) => {
+      const genormaliseerdeVraag = normaliseer(vraag);
+
+      let besteMatch = null;
+      let besteScore = 0;
+
+      DEMO_ANTWOORDEN.forEach((item) => {
+        let score = 0;
+        item.keywords.forEach((keyword) => {
+          if (genormaliseerdeVraag.includes(normaliseer(keyword))) {
+            score += 1;
+          }
+        });
+        if (score > besteScore) {
+          besteScore = score;
+          besteMatch = item;
+        }
+      });
+
+      const antwoord = besteMatch ? besteMatch.answer : DEMO_MELDING;
+
+      // Kunstmatige vertraging (600–900 ms) zodat de typ-indicator zichtbaar is
+      const vertraging = 600 + Math.random() * 300;
+      setTimeout(() => resolve(antwoord), vertraging);
+    });
+  }
+
+  /* ------------------------------------------------------------------------
+     4. BERICHTEN OP HET SCHERM ZETTEN
+     ------------------------------------------------------------------------ */
+
+  // sender is "user" of "bot". isError geeft het bericht een andere kleur.
+  function voegBerichtToe(sender, tekst, isError) {
+    const rij = document.createElement("div");
+    rij.className = "message-row " + (sender === "user" ? "user" : "bot");
+
+    const bubbel = document.createElement("div");
+    bubbel.className = "message-bubble" + (isError ? " error" : "");
+    // We gebruiken textContent (niet innerHTML) zodat bezoekersinvoer nooit
+    // als HTML wordt uitgevoerd — dit voorkomt HTML/script-injectie.
+    bubbel.textContent = tekst;
+
+    rij.appendChild(bubbel);
+    chatWindow.appendChild(rij);
+    scrollNaarBeneden();
+
+    return bubbel;
+  }
+
+  function scrollNaarBeneden() {
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+  }
+
+  // Toont een tijdelijke "typt..."-bubbel en geeft die terug, zodat we
+  // hem later weer kunnen verwijderen.
+  function toonTypIndicator() {
+    const rij = document.createElement("div");
+    rij.className = "message-row bot";
+    rij.id = "typingRow";
+
+    const bubbel = document.createElement("div");
+    bubbel.className = "message-bubble";
+    bubbel.innerHTML =
+      '<span class="typing-indicator" aria-label="De museumassistent typt">' +
+      "<span></span><span></span><span></span>" +
+      "</span>";
+
+    rij.appendChild(bubbel);
+    chatWindow.appendChild(rij);
+    scrollNaarBeneden();
+
+    return rij;
+  }
+
+  function verwijderTypIndicator(rij) {
+    if (rij && rij.parentNode) {
+      rij.parentNode.removeChild(rij);
+    }
+  }
+
+  /* ------------------------------------------------------------------------
+     5. EEN BERICHT VERSTUREN
+     ------------------------------------------------------------------------ */
+  let wordtVerwerkt = false; // voorkomt dubbel versturen bij snel achter elkaar klikken
+
+  async function verstuurBericht(tekst) {
+    const opgeschoondeTekst = tekst.trim();
+
+    // Lege berichten worden genegeerd (voorkomt lege bubbels)
+    if (!opgeschoondeTekst || wordtVerwerkt) {
+      return;
+    }
+
+    wordtVerwerkt = true;
+    sendBtn.disabled = true;
+    userInput.disabled = true;
+
+    // Suggestieknoppen verbergen zodra het gesprek écht begint
+    suggestionsBox.classList.add("hidden");
+
+    voegBerichtToe("user", opgeschoondeTekst);
+    userInput.value = "";
+
+    const typIndicatorRij = toonTypIndicator();
+
+    try {
+      const antwoord = await haalChatbotAntwoordOp(opgeschoondeTekst);
+      verwijderTypIndicator(typIndicatorRij);
+      voegBerichtToe("bot", antwoord);
+    } catch (fout) {
+      // Vriendelijke foutmelding in plaats van een technische foutmelding
+      console.error("Er ging iets mis bij het ophalen van een antwoord:", fout);
+      verwijderTypIndicator(typIndicatorRij);
+      voegBerichtToe(
+        "bot",
+        "Sorry, er ging iets mis bij het ophalen van een antwoord. " +
+          "Probeer het gerust opnieuw.",
+        true
+      );
+    } finally {
+      wordtVerwerkt = false;
+      sendBtn.disabled = false;
+      userInput.disabled = false;
+      userInput.focus();
+    }
+  }
+
+  /* ------------------------------------------------------------------------
+     6. NIEUW GESPREK STARTEN
+     ------------------------------------------------------------------------ */
+  function startNieuwGesprek() {
+    chatWindow.innerHTML = "";
+    voegBerichtToe("bot", WELCOME_MESSAGE);
+    suggestionsBox.classList.remove("hidden");
+    userInput.value = "";
+    userInput.focus();
+  }
+
+  /* ------------------------------------------------------------------------
+     7. EVENT LISTENERS
+     ------------------------------------------------------------------------ */
+
+  // Formulier versturen (zowel via Enter-toets als via de Verstuur-knop)
+  chatForm.addEventListener("submit", function (event) {
+    event.preventDefault(); // voorkomt dat de pagina herlaadt
+    verstuurBericht(userInput.value);
+  });
+
+  // Suggestieknoppen: sturen automatisch de bijbehorende vraag
+  suggestionButtons.forEach((knop) => {
+    knop.addEventListener("click", function () {
+      verstuurBericht(knop.dataset.question);
+    });
+  });
+
+  // "Nieuw gesprek"-knop
+  newChatBtn.addEventListener("click", startNieuwGesprek);
+
+  /* ------------------------------------------------------------------------
+     8. STARTEN
+     ------------------------------------------------------------------------ */
+  document.addEventListener("DOMContentLoaded", function () {
+    // Voor het geval het script toch vóór het HTML-document zou laden
+  });
+
+  // Toon het welkomstbericht zodra de pagina is geladen
+  voegBerichtToe("bot", WELCOME_MESSAGE);
+  userInput.focus();
+})();
